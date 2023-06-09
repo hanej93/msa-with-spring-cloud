@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.modelmapper.spi.MatchingStrategy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.userservice.dto.UserDto;
@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	public UserDto createUser(UserDto userDto) {
@@ -26,7 +27,7 @@ public class UserServiceImpl implements UserService {
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 		UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
-		userEntity.setEncryptedPwd("encrypted_password");
+		userEntity.setEncryptedPwd(passwordEncoder.encode(userDto.getPwd()));
 
 		userRepository.save(userEntity);
 
