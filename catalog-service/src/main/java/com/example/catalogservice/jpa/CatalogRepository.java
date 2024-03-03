@@ -6,5 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface CatalogRepository extends CrudRepository<CatalogEntity, Long> {
 
-	Optional<CatalogEntity> findByProductId();
+	Optional<CatalogEntity> findByProductId(String productId);
 }
