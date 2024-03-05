@@ -6,7 +6,9 @@ import java.util.function.Supplier;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -15,12 +17,18 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.util.matcher.IpAddressMatcher;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+	private final AuthenticationManager authenticationManager;
 
 	public static final String ALLOWED_IP_ADDRESS = "127.0.0.1";
 	public static final String SUBNET = "/32";
@@ -39,6 +47,9 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		// Configure AuthenticationManagerBuilder
+		AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+		AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
 		http
 			.csrf(AbstractHttpConfigurer::disable)
@@ -48,8 +59,10 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> {
 				auth
 					.requestMatchers("/**").permitAll()
-					.requestMatchers("/users").permitAll();
-			});
+					.requestMatchers("/**").access(
+						new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('172.30.1.48')"));
+			})
+			.addFilter(getAuthenticationFilter(authenticationManager));
 
 		return http.build();
 	}
@@ -58,4 +71,7 @@ public class SecurityConfig {
 		return new AuthorizationDecision(ALLOWED_IP_ADDRESS_MATCHER.matches(object.getRequest()));
 	}
 
+	private AuthenticationFilter getAuthenticationFilter(AuthenticationManager authenticationManager) throws Exception {
+		return new AuthenticationFilter(authenticationManager);
+	}
 }
