@@ -11,6 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.example.userservice.dto.UserDto;
 import com.example.userservice.service.UserService;
 import com.example.userservice.vo.RequestLogin;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,8 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-	private UserService userService;
-	private Environment environment;
+	private final UserService userService;
+	private final Environment environment;
 
 	public AuthenticationFilter(AuthenticationManager authenticationManager,
 		UserService userService, Environment environment) {
@@ -52,6 +53,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 		Authentication authResult) throws IOException, ServletException {
 		String username = ((User)authResult.getPrincipal()).getUsername();
-		log.debug(username);
+		UserDto userDetails = userService.getUserDetailsByEmail(username);
 	}
 }
