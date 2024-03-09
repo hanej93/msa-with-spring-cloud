@@ -3,12 +3,14 @@ package com.example.userservice.security;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.example.userservice.service.UserService;
 import com.example.userservice.vo.RequestLogin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,8 +21,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-	public AuthenticationFilter(AuthenticationManager authenticationManager) {
+	private UserService userService;
+	private Environment environment;
+
+	public AuthenticationFilter(AuthenticationManager authenticationManager,
+		UserService userService, Environment environment) {
 		super(authenticationManager);
+		this.userService = userService;
+		this.environment = environment;
 	}
 
 	@Override

@@ -25,13 +25,11 @@ import com.example.userservice.vo.ResponseUser;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/user-service")
 @RequiredArgsConstructor
 public class UserController {
 
 	private final Environment environment;
 	private final Greeting greeting;
-
 	private final UserService userService;
 
 	@GetMapping("/health_check")
