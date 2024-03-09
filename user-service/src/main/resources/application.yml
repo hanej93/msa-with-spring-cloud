@@ -34,3 +34,6 @@ eureka:
 greeting:
   message: Welcome to the Simple E-commence.
 
+logging:
+  level:
+    com.example.userservice: debug
