@@ -4,8 +4,11 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 
 import java.util.function.Supplier;
 
+import org.apache.catalina.filters.RemoteIpFilter;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -14,10 +17,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
@@ -30,7 +31,7 @@ import com.example.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -63,9 +64,10 @@ public class SecurityConfig {
 		http.authorizeHttpRequests((authz) -> authz
 				.requestMatchers(new AntPathRequestMatcher("/actuator/**")).permitAll()
 				.requestMatchers(new AntPathRequestMatcher("/users", "POST")).permitAll()
-				//                        .requestMatchers("/**").access(this::hasIpAddress)
+			    // .requestMatchers("/**").access(this::hasIpAddress)
+				.requestMatchers("/**").permitAll()
 				.requestMatchers("/**").access(
-					new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('172.30.1.48')"))
+					new WebExpressionAuthorizationManager("hasIpAddress('127.0.0.1') or hasIpAddress('::1')"))
 				.anyRequest().authenticated()
 			)
 			.authenticationManager(authenticationManager)
@@ -78,9 +80,9 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	// private AuthorizationDecision hasIpAddress(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
-	// 	return new AuthorizationDecision(ALLOWED_IP_ADDRESS_MATCHER.matches(object.getRequest()));
-	// }
+	private AuthorizationDecision hasIpAddress(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
+		return new AuthorizationDecision(ALLOWED_IP_ADDRESS_MATCHER.matches(object.getRequest()));
+	}
 
 	private AuthenticationFilter getAuthenticationFilter(AuthenticationManager authenticationManager) throws Exception {
 		return new AuthenticationFilter(authenticationManager, userService, env);
