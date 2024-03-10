@@ -1,7 +1,9 @@
 package com.example.userservice.security;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -62,14 +64,16 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		String username = ((User)authResult.getPrincipal()).getUsername();
 		UserDto userDetails = userService.getUserDetailsByEmail(username);
 
-		SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(environment.getProperty("token.secret")));
+		byte[] secretKeyBytes = Base64.getEncoder().encode(environment.getProperty("token.secret").getBytes());
+		SecretKey secretKey = Keys.hmacShaKeyFor(secretKeyBytes);
+
+		Instant now = Instant.now();
 
 		String token = Jwts.builder()
 			.subject(userDetails.getUserId())
-			.expiration(new Date(System.currentTimeMillis()
-				+ Long.parseLong(environment.getProperty("token.expiration-time")))
-			)
-			.signWith(secretKey, Jwts.SIG.HS512)
+			.expiration(Date.from(now.plusMillis(Long.parseLong(environment.getProperty("token.expiration-time")))))
+			.issuedAt(Date.from(now))
+			.signWith(secretKey)
 			.compact();
 
 		response.addHeader("token", token);
