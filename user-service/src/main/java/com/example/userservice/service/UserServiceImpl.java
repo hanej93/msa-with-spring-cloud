@@ -7,11 +7,16 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.jpa.UserEntity;
@@ -26,6 +31,8 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final RestTemplate restTemplate;
+	private final Environment env;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -58,7 +65,14 @@ public class UserServiceImpl implements UserService {
 
 		UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
 
-		List<ResponseOrder> orders = new ArrayList<>();
+		// List<ResponseOrder> orders = new ArrayList<>();
+
+		/* Using as restTemplate */
+		String orderUrl = String.format(env.getProperty("order-service.url"), userId);
+		ResponseEntity<List<ResponseOrder>> orderListResponse = restTemplate.exchange(orderUrl, HttpMethod.GET, null,
+			new ParameterizedTypeReference<List<ResponseOrder>>() {});
+		List<ResponseOrder> orders = orderListResponse.getBody();
+
 		userDto.setOrders(orders);
 
 		return userDto;
