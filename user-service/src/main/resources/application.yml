@@ -38,6 +38,12 @@ logging:
   level:
     com.example.userservice: debug
 
-token:
-  expiration-time: 84600000
-  secret: ej-testej-testej-testej-testej-testej-test
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans
+
+#token:
+#  expiration-time: 84600000
+#  secret: ej-testej-testej-testej-testej-testej-test

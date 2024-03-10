@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.userservice.dto.UserDto;
@@ -28,13 +27,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
 
-	private final Environment environment;
+	private final Environment env;
 	private final Greeting greeting;
 	private final UserService userService;
 
 	@GetMapping("/health_check")
 	public String status() {
-		return String.format("It's Working in User Service on PORT %s", environment.getProperty("local.server.port"));
+		return String.format("It's Working in User Service\n"
+				+ "port(local.server.port) : %s\n"
+				+ "port(server.port) : %s\n"
+				+ "token.secret : %s\n"
+				+ "token.expiration-time : %s\n",
+			env.getProperty("local.server.port"),
+			env.getProperty("server.port"),
+			env.getProperty("token.secret"),
+			env.getProperty("token.expiration-time"));
 	}
 
 	@GetMapping("/welcome")
