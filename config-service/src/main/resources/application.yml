@@ -6,7 +6,8 @@ spring:
   cloud:
     config:
       server:
-        native:
-          search-locations: file:///C:\Users\hanej\Desktop\Study\git-local-repo
+#        native:
+#          search-locations: file:///C:\Users\hanej\Desktop\Study\git-local-repo
         git:
-          uri: file:///C:\Users\hanej\Desktop\Study\git-local-repo
+          uri: https://github.com/hanej93/spring-cloud-config
+          default-label: master
