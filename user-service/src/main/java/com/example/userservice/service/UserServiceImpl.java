@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.userservice.client.OrderServiceClient;
 import com.example.userservice.dto.UserDto;
 import com.example.userservice.jpa.UserEntity;
 import com.example.userservice.jpa.UserRepository;
@@ -33,6 +34,7 @@ public class UserServiceImpl implements UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final RestTemplate restTemplate;
 	private final Environment env;
+	private final OrderServiceClient orderServiceClient;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -68,10 +70,13 @@ public class UserServiceImpl implements UserService {
 		// List<ResponseOrder> orders = new ArrayList<>();
 
 		/* Using as restTemplate */
-		String orderUrl = String.format(env.getProperty("order-service.url"), userId);
-		ResponseEntity<List<ResponseOrder>> orderListResponse = restTemplate.exchange(orderUrl, HttpMethod.GET, null,
-			new ParameterizedTypeReference<List<ResponseOrder>>() {});
-		List<ResponseOrder> orders = orderListResponse.getBody();
+		// String orderUrl = String.format(env.getProperty("order-service.url"), userId);
+		// ResponseEntity<List<ResponseOrder>> orderListResponse = restTemplate.exchange(orderUrl, HttpMethod.GET, null,
+		// 	new ParameterizedTypeReference<List<ResponseOrder>>() {});
+		// List<ResponseOrder> orders = orderListResponse.getBody();
+
+		/* Using as FeignClient */
+		List<ResponseOrder> orders = orderServiceClient.getOrders(userId);
 
 		userDto.setOrders(orders);
 
