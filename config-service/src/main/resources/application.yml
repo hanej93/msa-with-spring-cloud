@@ -3,11 +3,13 @@ server:
 spring:
   application:
     name: config-service
+  profiles:
+    active: native
   cloud:
     config:
       server:
-#        native:
-#          search-locations: file:///C:\Users\hanej\Desktop\Study\git-local-repo
+        native:
+          search-locations: file:///${user.home}\Desktop\Study\native-file-repo
         git:
           uri: https://github.com/hanej93/spring-cloud-config
           default-label: master
