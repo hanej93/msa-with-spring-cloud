@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.crypto.SecretKey;
+
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,12 +62,14 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		String username = ((User)authResult.getPrincipal()).getUsername();
 		UserDto userDetails = userService.getUserDetailsByEmail(username);
 
+		SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(environment.getProperty("token.secret")));
+
 		String token = Jwts.builder()
 			.subject(userDetails.getUserId())
 			.expiration(new Date(System.currentTimeMillis()
 				+ Long.parseLong(environment.getProperty("token.expiration-time")))
 			)
-			.signWith(SignatureAlgorithm.HS512, environment.getProperty("token.secret"))
+			.signWith(secretKey, Jwts.SIG.HS512)
 			.compact();
 
 		response.addHeader("token", token);
