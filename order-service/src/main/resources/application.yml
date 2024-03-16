@@ -6,10 +6,14 @@ spring:
     name: order-service
 
   datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+#    url: jdbc:h2:mem:testdb
+#    username: sa
+#    password:
+#    driver-class-name: org.h2.Driver
+    url: jdbc:mysql://localhost:3306/mydb?useUnicode=true&characterEncoding=utf8
+    username: root
+    password: mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
