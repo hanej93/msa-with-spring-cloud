@@ -21,6 +21,7 @@ import com.example.userservice.vo.Greeting;
 import com.example.userservice.vo.RequestUser;
 import com.example.userservice.vo.ResponseUser;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -32,6 +33,7 @@ public class UserController {
 	private final UserService userService;
 
 	@GetMapping("/health_check")
+	@Timed(value = "users.status", longTask = true)
 	public String status() {
 		return String.format("It's Working in User Service\n"
 				+ "port(local.server.port) : %s\n"
@@ -44,6 +46,7 @@ public class UserController {
 			env.getProperty("token.expiration-time"));
 	}
 
+	@Timed(value = "users.welcome", longTask = true)
 	@GetMapping("/welcome")
 	public String welcome() {
 		// return environment.getProperty("greeting.message");
